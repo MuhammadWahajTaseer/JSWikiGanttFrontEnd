@@ -602,9 +602,9 @@ window.onload = function () {
         try
         {
             strWikiCode = '\n<task>'
-                +'\n\t<pID>'+oTask.intId+'</pID>'
+                + '\n\t<pID>'+oTask.intId+'</pID>'
                 + pName
-                +'\n\t<pColor>'+oTask.strColor+'</pColor>'
+                + '\n\t<pColor>'+oTask.strColor+'</pColor>'
                 + pDateStart
                 + pDateEnd
                 + pRes
@@ -614,7 +614,7 @@ window.onload = function () {
                 + pDepend
                 + pMile
                 + pDur
-                +'\n</task>'
+                + '\n</task>'
             ;
         }
         //TODO FIX the error
