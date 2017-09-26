@@ -19,11 +19,11 @@ window.onload = function () {
         ,reGantMatch : /(<jsgantt[^>]*>)([\s\S]*)(<\/jsgantt>)/
         ,isActivitiesIdentfiedByName : true
         
-        ,currentColor : '8CB6CE' //dynamically changed
-        ,defaultChecked : false //dynamically changed
-        ,defaultColor: '8CB6CE' //dynamically changed
+        ,currentColor : '8CB6CE'    //dynamically assigned
+        ,defaultChecked : false     //dynamically assigned
+        ,defaultColor: '8CB6CE'     //dynamically assigned
         ,"img - edit" : ''
-        ,"img - list" : 'extensions/JSWikiGanttFrontEnd/img/list.png' //Icon made by  from www.flaticon.com 
+        ,"img - list" : 'extensions/JSWikiGanttFrontEnd/img/list.png' 
         ,"img - del"  : 'extensions/JSWikiGanttFrontEnd/img/x.png'
         ,marginSize : 20
     }
@@ -71,23 +71,23 @@ window.onload = function () {
             ,"gantt parse error - unknow activity"      : "Błąd! Nieznana aktywność (nazwa: %pRes%, kolor: %pColor%). Ten diagram nie jest kalendarzem, albo są w nim błędy."
             ,"gantt build error - at task"              : "Błąd budowania wiki-kodu przy zadaniu o id %pID% (nazwa: %pName%).\nBłąd: %errDesc%."
             ,"gantt add error - unknown person"         : "Błąd! Wybrana osoba nie została znaleziona. Czy na pewno dodałeś(-aś) ją wcześniej?"
-            ,"header - add"         : "Dodaj wpis"
-            ,"header - edit"        : "Edytuj wpis"
-            ,"header - persons"     : "Wybierz osobę"
-            ,"header - del"         : "Czy na pewno chcesz usunąć?"
-            ,"label - person"       : "Osoba"
-            ,"label - activity"     : "Typ"
-            ,"label - date start"   : "Początek"
-            ,"label - date end"     : "Koniec"
-            ,"label - new activity" : "dodaj wpis"
-            ,"label - new person"   : "dodaj osobę"
-            ,"alt - mod"            : "Zmień"
-            ,"alt - del"            : "Usuń"
-            ,"close button label"   : "Zamknij"
-            ,"title - list act"     : "Pokaż wpisy osoby"
-            ,"title - edit"         : "Edytuj"
-            ,"title - add"          : "Dodaj"
-            ,"title - del"          : "Usuń"
+            ,"header - add"                             : "Dodaj wpis"
+            ,"header - edit"                            : "Edytuj wpis"
+            ,"header - persons"                         : "Wybierz osobę"
+            ,"header - del"                             : "Czy na pewno chcesz usunąć?"
+            ,"label - person"                           : "Osoba"
+            ,"label - activity"                         : "Typ"
+            ,"label - date start"                       : "Początek"
+            ,"label - date end"                         : "Koniec"
+            ,"label - new activity"                     : "dodaj wpis"
+            ,"label - new person"                       : "dodaj osobę"
+            ,"alt - mod"                                : "Zmień"
+            ,"alt - del"                                : "Usuń"
+            ,"close button label"                       : "Zamknij"
+            ,"title - list act"                         : "Pokaż wpisy osoby"
+            ,"title - edit"                             : "Edytuj"
+            ,"title - add"                              : "Dodaj"
+            ,"title - del"                              : "Usuń"
             ,"activities" : [
                 {name: "Urlop", color:"00cc00"},
                 {name: "Delegacja", color:"0000cc"},
@@ -108,6 +108,9 @@ window.onload = function () {
         var nel = document.createElement('a');
         nel.href = "javascript:oJSWikiGanttFrontEnd.startEditor()";
         nel.style.cssText = "float:right";
+        nel.style.display = "none";
+        nel.id = "editing_button";
+        oJSWikiGanttFrontEnd.editBtnRef = nel;
         nel.appendChild(document.createTextNode(this.lang["button label"]));
         elTB.insertBefore(nel, elTB.firstChild);
     }
@@ -119,20 +122,14 @@ window.onload = function () {
         if (strWikicode===false)
         {
             jsAlert(this.lang["gantt not found"])
+            this.oParent.oListAct.oMsg.close();
+
         }
 
         if (!this.parse(strWikicode))
         {
             return;
         }
-
-        //if (this.conf.isAutoAddLogged && typeof(mw.config.values.wgUserName)=='string' && mw.config.values.wgUserName.length)
-        //{
-            //if (this.firstIdOfPersonByName(mw.config.values.wgUserName)===false)
-            //{
-            //    this.addPerson(mw.config.values.wgUserName);
-            //}
-        //}
 
         // Main editor window: list of tasks
         this.oListAct.show();  
@@ -521,30 +518,7 @@ window.onload = function () {
     }
     
     oJSWikiGanttFrontEnd.getContents = function ()
-    {
-       /** let request = $.ajax({
-            url: mw.util.wikiScript('api'),
-            type: 'get',
-            data: { action:'parse', prop: 'text',page: 'Test', contentmodel: 'wikitext', format:'json' },
-            dataType: 'json'
-        });
-        
-        // Callback handler that will be called on success
-        request.done(function (response, textStatus, jqXHR){
-            console.log("Hooray, it worked!");
-            console.log(response);
-        });
-        
-        // Callback handler that will be called on failure
-        request.fail(function (jqXHR, textStatus, errorThrown){
-            // Log the error to the console
-            console.error(
-                "The following error occurred: "+
-                textStatus, errorThrown
-            );
-        }); */
-        
-        //this.elEditArea = document.getElementById('wpTextbox1');
+    {        
         this.elEditArea = document.getElementById('wpTextbox1');
         let el = this.elEditArea;
         let m = el.value.match(this.conf.reGantMatch);
@@ -588,7 +562,7 @@ window.onload = function () {
     {
         let strWikiCode = '';
 
-        let pName = (oTask.strName) 	? '\n\t<pName>'+this.encodeHTML(oTask.strName)+'</pName>' : '';
+        let pName = (oTask.strName) 	       ? '\n\t<pName>'+this.encodeHTML(oTask.strName)+'</pName>' : '';
         let pDateStart = (oTask.strDateStart) 	? '\n\t<pStart>'+oTask.strDateStart+'</pStart>' : '';
         let pDateEnd = (oTask.strDateEnd) 	? '\n\t<pEnd>'+oTask.strDateEnd+'</pEnd>' : '';
         let pDur = (oTask.intDur)		? '\n\t<pDur>'+oTask.intDur+'</pDur>' : '';
@@ -632,136 +606,6 @@ window.onload = function () {
     }
 
 
-
-
-
-
-
-
-
-/***************************************************************************************************************************/
-
-
-    oJSWikiGanttFrontEnd.oModPerson = new Object();
-
-    oJSWikiGanttFrontEnd.oModPerson.showAdd = function ()
-    {
-        this.oParent.oNewPerson = {
-            strPersonName : ''
-        };
-
-
-        var arrFields = this.getArrFields('oJSWikiGanttFrontEnd.oNewPerson');
-        var strHTML = this.oParent.createForm(arrFields, this.oParent.lang['header - add']);
-
-
-        var msg = this.oMsg;
-        msg.show(strHTML, 'oJSWikiGanttFrontEnd.oModPerson.submitAdd()');
-        msg.repositionMsgCenter();
-    }
-
-    oJSWikiGanttFrontEnd.oModPerson.submitAdd = function ()
-    {
-        this.oParent.addPerson(this.oParent.oNewPerson.strPersonName);
-
-        this.submitCommon();
-    }
-
-    oJSWikiGanttFrontEnd.oModPerson.showEdit = function(intPersonId)
-    {
-
-        var intPer = this.oParent.indexOfPerson(intPersonId);
-        this.oParent.oNewPerson = {
-            strPersonName : this.oParent.arrPersons[intPer].strName
-        };
-
-
-        var arrFields = this.getArrFields('oJSWikiGanttFrontEnd.oNewPerson');
-        var strHTML = this.oParent.createForm(arrFields, this.oParent.lang['header - edit']);
-
-
-        var msg = this.oMsg;
-        msg.show(strHTML, 'oJSWikiGanttFrontEnd.oModPerson.submitEdit('+intPersonId+')');
-        msg.repositionMsgCenter();
-    }
-
-    oJSWikiGanttFrontEnd.oModPerson.submitEdit = function(intPersonId)
-    {
-
-        this.oParent.setPerson (this.oParent.oNewPerson.strPersonName, intPersonId);
-
-
-        this.submitCommon();
-    }
-
-    oJSWikiGanttFrontEnd.oModPerson.showDel = function(intPersonId)
-    {
-
-        var intPer = this.oParent.indexOfPerson(intPersonId);
-
-
-        var strHTML = "<h2>"+this.oParent.lang['header - del']+"</h2>"
-            + this.oParent.arrPersons[intPer].strName;
-
-
-        var msg = this.oMsg;
-        msg.show(strHTML, 'oJSWikiGanttFrontEnd.oModPerson.submitDel('+intPersonId+')');
-        msg.repositionMsgCenter();
-    }
-    // EOC@line#99
-    oJSWikiGanttFrontEnd.oModPerson.submitDel = function(intPersonId)
-    {
-
-        this.oParent.delPerson (intPersonId);
-
-
-        this.submitCommon();
-    }
-    // EOC@line#138
-    oJSWikiGanttFrontEnd.oModPerson.getArrFields = function(strNewPersonObject)
-    {
-        return [
-            {type:'text', maxlen: 10, lbl: this.oParent.lang['label - person']
-                , value:this.oParent.oNewPerson.strPersonName
-                , jsUpdate:strNewPersonObject+'.strPersonName = this.value'}
-        ];
-    }
-    // EOC@line#150
-    oJSWikiGanttFrontEnd.oModPerson.submitCommon = function ()
-    {
-
-        var strWikicode = this.oParent.buildWikicode();
-
-        this.oParent.setContents(strWikicode);
-
-        this.oMsg.close();
-
-
-        this.oParent.oListPersons.refresh();
-    }
-    // msgs_mod_p, EOF
-    // msgs_mod_t, line#0
-
-
-/***************************************************************************************************************************/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     /* ------------------------------------------------------------------------ *\
         Modify task object used to modify any task  	
     \* ------------------------------------------------------------------------ */
@@ -798,6 +642,7 @@ window.onload = function () {
         var strHTML = this.oParent.createForm(arrFields, this.oParent.lang['header - add']);
 
         var msg = this.oMsg;
+        msg.saveBtnFunction = 'oJSWikiGanttFrontEnd.oModTask.saveBtnFunction('+ null +', '+ this.oParent.oNewTask.intParent+','+ 1 +')';
         msg.show(strHTML, 'oJSWikiGanttFrontEnd.oModTask.submitAdd()');
         msg.repositionMsgCenter();
         $(document).ready(function() {
@@ -822,6 +667,7 @@ window.onload = function () {
         oP.oNewTask = null;
 
         this.submitCommon();
+        return true;
     }
 
     /* ------------------------------------------------------------------------ *\
@@ -859,11 +705,11 @@ window.onload = function () {
         
         let arrFields = this.getArrFields('oJSWikiGanttFrontEnd.oNewTask');
         let strHTML = this.oParent.createForm(arrFields, this.oParent.lang['header - edit']);
-            
+
+        this.oParent.oNewTask.intParent = (this.oParent.oNewTask.intParent) ? this.oParent.oNewTask.intParent : null;
 
         let msg = this.oMsg;
-        this.oParent.oNewTask.intParent = (this.oParent.oNewTask.intParent) ? this.oParent.oNewTask.intParent : null;
-        msg.saveBtnFunction = 'oJSWikiGanttFrontEnd.oModTask.saveBtnFunction('+i+', '+ this.oParent.oNewTask.intParent+')';
+        msg.saveBtnFunction = 'oJSWikiGanttFrontEnd.oModTask.saveBtnFunction('+i+', '+ this.oParent.oNewTask.intParent+','+ 0 +')';
         msg.show(strHTML, 'oJSWikiGanttFrontEnd.oModTask.submitEdit('+i+', '+ this.oParent.oNewTask.intParent+')');
         msg.repositionMsgCenter();
 
@@ -914,6 +760,7 @@ window.onload = function () {
         oP.oNewTask = null;
 
         this.submitCommon();
+        return true;
     }
 
     /* ------------------------------------------------------------------------ *\
@@ -994,13 +841,24 @@ window.onload = function () {
     }
     
     /* ------------------------------------------------------------------------ *\
-          	
+         The function for save and return to read mode  	
     \* ------------------------------------------------------------------------ */
-    oJSWikiGanttFrontEnd.oModTask.saveBtnFunction = function(taskIndex, intParentOld){
+    oJSWikiGanttFrontEnd.oModTask.saveBtnFunction = function(taskIndex, intParentOld, isNewTask){
+        
+        let submit;
         
         // Submit the task
-        this.submitEdit(taskIndex, intParentOld);
+        if (!isNewTask){
+            submit = this.submitEdit(taskIndex, intParentOld);
+        }
+        else{
+            submit = this.submitAdd();
+        }
         
+        // If submission was unsuccessful then return
+        if (!submit){
+            return;
+        }
         // Submit the media wiki form
         $("#editform").submit();
         
@@ -1010,18 +868,19 @@ window.onload = function () {
         //Add semi-transparent overlay while page loads
         this.oParent.createOverlay();
     
-    
     }
     
     /* ------------------------------------------------------------------------ *\
         When user clicks on delete task button  	
     \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.oModTask.showDel = function(taskId){
-
         let strHTML, i;
+        let start = '', end = '';
         for (i=0; i<this.oParent.arrTasks.length; i++){
             let oA = this.oParent.arrTasks[i];
 
+            
+            
             if (oA.intId === taskId){
 
                 strHTML = "<h2>"+this.oParent.lang['header - del']+"</h2>"
@@ -1031,7 +890,7 @@ window.onload = function () {
             }
         }
 
-        let msg = this.oMsg;
+        let msg = this.oMsgDel;
         msg.show(strHTML, 'oJSWikiGanttFrontEnd.oModTask.submitDel('+i+')');
         msg.repositionMsgCenter();
     }
@@ -1042,8 +901,20 @@ window.onload = function () {
     \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.oModTask.submitDel = function(taskIndex){
 
+        //Making a reference of the task
+        let oTask = this.oParent.arrTasks[taskIndex];
+        let arrTasks = this.oParent.arrTasks;
+        
+        //Remove it from the array
         this.oParent.arrTasks.splice(taskIndex, 1);
-        //this.oParent.delTask(taskIndex);
+        
+        // If this task had any children, making their parent null
+        let i;
+        for (i = 0; i < arrTasks.length; i++) {
+            if (arrTasks[i].intParent === oTask.intId) {
+                arrTasks[i].intParent = null;
+            }
+        }
 
         this.submitCommon();
     }
@@ -1550,8 +1421,21 @@ window.onload = function () {
 
 
 
+    /* ------------------------------------------------------------------------ *\
+        Displays the Edit Gantt option if the <jsgantt> tags are present
+    \* ------------------------------------------------------------------------ */
 
-
+    oJSWikiGanttFrontEnd.checkForTags = function () {
+        let elEditArea = document.getElementById('wpTextbox1');
+        let match = elEditArea.value.match(oJSWikiGanttFrontEnd.conf.reGantMatch);
+        if(match){
+            let editBtn = oJSWikiGanttFrontEnd.editBtnRef;
+            editBtn.style.display = 'block';
+            return true;
+        }
+        return false;
+    }
+    
 
     /* ------------------------------------------------------------------------ *\
         INIT 	
@@ -1569,7 +1453,15 @@ window.onload = function () {
 
         // Edit button
         this.addEdButton();
-
+        
+        // Check if gantt chart tags are present
+        let tagsPresent = this.checkForTags();
+        if (!tagsPresent){
+            // Add event listener for the jsgantt tag
+            let elEditArea = document.getElementById('wpTextbox1');
+            elEditArea.addEventListener("keyup", this.checkForTags);
+        }
+        
         // Task form
         var msg = new sftJSmsg();
         msg.repositionMsgCenter();
@@ -1577,10 +1469,20 @@ window.onload = function () {
         msg.styleZbase += 30;
         msg.showCancel = true;
         msg.showSave = true;
-        msg.autoOKClose = false;
+        msg.autoOKClose = true;
         msg.createRegularForm = false;
         this.oModTask.oMsg = msg;
         this.oModTask.oParent = this;
+        
+        // Task delete form
+        var msgDel = new sftJSmsg();
+        msgDel.repositionMsgCenter();
+        msgDel.styleWidth = 1000;
+        msgDel.styleZbase += 40;
+        msgDel.showCancel = true;
+        msgDel.autoOKClose = true;
+        msgDel.createRegularForm = false;
+        this.oModTask.oMsgDel = msgDel;
 
         // Tasks List
         var msg = new sftJSmsg();
@@ -1643,13 +1545,6 @@ window.onload = function () {
     	addOnloadHook(function () {oJSWikiGanttFrontEnd.init()});
         oJSWikiGanttFrontEnd.init();
     }
-
-
-
-
-
-
-
 
 
 
