@@ -617,7 +617,7 @@ window.onload = function () {
     \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.oModTask.showAdd = function(intTaskId)
     {
-        this.buildLabels();
+        this.buildLabels(intTaskId);
         let oP = this.oParent;
         //Increment id
         oP.nextId++;
@@ -675,7 +675,7 @@ window.onload = function () {
     \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.oModTask.showEdit = function(taskId){
 
-        this.buildLabels();
+        this.buildLabels(taskId);
         let i;
         for (i=0; i<this.oParent.arrTasks.length; i++){
             let oA = this.oParent.arrTasks[i];
@@ -922,7 +922,7 @@ window.onload = function () {
     /* ------------------------------------------------------------------------ *\
         Builds 2 arrays {label,value} objects of all tasks and only groups
     \* ------------------------------------------------------------------------ */
-    oJSWikiGanttFrontEnd.oModTask.buildLabels = function ()
+    oJSWikiGanttFrontEnd.oModTask.buildLabels = function (taskId)
     {
         this.arrTaskLblsGroup = new Array();
         this.arrTaskLbls = new Array();
@@ -939,8 +939,13 @@ window.onload = function () {
         let i;
         for (i=0; i<this.oParent.arrTasks.length; i++)
         {
+            /* Skip itself */
+            if (this.oParent.arrTasks[i].intId === taskId) {
+                continue;
+            }
+            
             /* Only use tasks that are grouping tasks */
-            if(this.oParent.arrTasks[i].boolGroup){
+            if (this.oParent.arrTasks[i].boolGroup) {
                 this.arrTaskLblsGroup.push({
                     value	: this.oParent.arrTasks[i].intId,
                     lbl	    : this.oParent.arrTasks[i].strName
@@ -1360,7 +1365,7 @@ window.onload = function () {
 
             strList += ''
                 +'<li style="margin-left:'+ indentLevel * oP.conf.marginSize +'px; list-style:'+ listStyletype +'";>'
-                    +'<a href="javascript:oJSWikiGanttFrontEnd.oModTask.showEdit('+task_curr.intId.toString()+')" title="'
+                    +'<a href="javascript:oJSWikiGanttFrontEnd.oModTask.showEdit('+task_curr.intId+')" title="'
                             +this.oParent.lang["title - edit"]
                         +'">'
                         +task_curr.strName
@@ -1377,7 +1382,7 @@ window.onload = function () {
         }
         strList += ''
             +'<li>'
-                +'<a href="javascript:oJSWikiGanttFrontEnd.oModTask.showAdd('+oP.nextId.toString()+')" title="'
+                +'<a href="javascript:oJSWikiGanttFrontEnd.oModTask.showAdd('+oP.nextId+')" title="'
                             +this.oParent.lang["title - add"]
                         +'">'
                     +this.oParent.lang['label - new activity']
