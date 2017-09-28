@@ -1122,7 +1122,7 @@ window.onload = function () {
         Algorithm that finds the proper spot for task in already sorted array and inserts it
         It also accounts for when a  parent task changes then all of it's kids must follow
     \* ------------------------------------------------------------------------------------- */
-    oJSWikiGanttFrontEnd.oModTask.insertTask = function (taskIndex, intParentOld){                      // intParentOld may be null             //@TODO: only move tasks if parent changes 
+    oJSWikiGanttFrontEnd.oModTask.insertTask = function (taskIndex, intParentOld){                      // intParentOld may be null
         let oP = this.oParent;
         let oNewTask = oP.oNewTask;
         let len = oP.arrTasks.length;
@@ -1155,6 +1155,12 @@ window.onload = function () {
             
             /* If it's the last task OR (previous task is not the parent) */
             if (!(task_next) || ((task_prev && task_prev.intId != task_curr.intParent)) ) { 
+                
+                /* If the task that is being moved has any children, then skip them */
+                if (oP.arrTasks[i].intParent === oNewTask.intId) {
+                    i++;
+                    continue;
+                }
                 
                 /* Keep removing from stack until either (the last element is the parent of current task or stack is empty) */
                 while (stack.last() != task_curr.intParent) {                                        
@@ -1255,19 +1261,20 @@ window.onload = function () {
     /* ------------------------------------------------------------------------ *\
         Moves the children to where the parent moved
     \* ------------------------------------------------------------------------ */
-    oJSWikiGanttFrontEnd.oModTask.moveChildren = function(startingAt, EndingAt, parentIndex) {
+    oJSWikiGanttFrontEnd.oModTask.moveChildren = function(startingAt, endingAt, parentIndex) {
         let oP = this.oParent;
         let arr = oP.arrTasks;
-        let diff = EndingAt - startingAt;
+        let diff = (endingAt) ? endingAt - startingAt : -1;
         let i = 0;
         
-        let children = arr.splice(startingAt, diff+1);
+        let children = arr.splice(startingAt, diff + 1);
         console.log(children)
+        console.log(startingAt, endingAt, parentIndex);
         
         if (parentIndex > startingAt) {
-            parentIndex-=(diff+1);    
+            parentIndex -= (diff + 1);    
         }
-        arr.splice(parentIndex+1, 0, children)  // since children is also an array we need to flatten the tasks array
+        arr.splice(parentIndex + 1, 0, children)  // since children is also an array we need to flatten the tasks array
         arr = arr.reduce(function(a,b) {
                             return a.concat(b);           
                         }, []);
@@ -1427,7 +1434,7 @@ window.onload = function () {
 
 
     /* ------------------------------------------------------------------------ *\
-        Displays the Edit Gantt option if the <jsgantt> tags are present
+        Displays Edit Gantt option if the <jsgantt> tags present (keyup event) 
     \* ------------------------------------------------------------------------ */
 
     oJSWikiGanttFrontEnd.checkForTags = function () {
@@ -1514,7 +1521,10 @@ window.onload = function () {
             let i = 0, taskRequested;
             for (i; i < this.arrTasks.length; i++) {
                 let iTaskName = this.arrTasks[i].strName;
-                iTaskName = iTaskName.replace(/"/g, '');
+                console.log(iTaskName);
+                
+                iTaskName = iTaskName.replace(/&quot;|\'|\+|\"/g, '');
+                iTaskName = iTaskName.replace(/\s+/g, " ")
                 openTask = openTask.replace(/%27/g, "'")
                 openTask = openTask.replace(/%3C/g, "<")
                 openTask = openTask.replace(/%3E/g, ">")
@@ -1540,7 +1550,8 @@ window.onload = function () {
     if (window.location.href.indexOf('openTask') > -1) {
         let taskName = window.location.href.split('openTask=')[1];
         window.history.replaceState({}, "", window.location.href.split('#openTask=')[0]);
-        openTask = taskName.replace(/\+/g, ' ');
+        
+        openTask = taskName.replace(/\+|\'/g, ' ');
         //console.log('Open this task: ' + openTask);
         addOnloadHook(function () {oJSWikiGanttFrontEnd.init()});
         oJSWikiGanttFrontEnd.init(openTask);
