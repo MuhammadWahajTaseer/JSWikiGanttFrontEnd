@@ -1272,7 +1272,7 @@ window.onload = function () {
     oJSWikiGanttFrontEnd.oModTask.moveChildren = function(startingAt, endingAt, parentIndex) {
         let oP = this.oParent;
         let arr = oP.arrTasks;
-        let diff = (endingAt) ? endingAt - startingAt : -1;
+        let diff = (endingAt != null && startingAt != null) ? endingAt - startingAt : -1;
         let i = 0;
         
         let children = arr.splice(startingAt, diff + 1);
@@ -1368,6 +1368,7 @@ window.onload = function () {
                     }
                 }
             }
+            
             else if (task_curr.intParent) {
                 indentLevel++;
             }
@@ -1379,7 +1380,7 @@ window.onload = function () {
             }    
 
             strList += ''
-                +'<li style="margin-left:'+ indentLevel * oP.conf.marginSize +'px; list-style:'+ listStyletype +'";>'
+                +'<li style="margin-left:'+ indentLevel * oP.conf.marginSize +'px; list-style:'+ listStyletype +';">'
                     +'<a href="javascript:oJSWikiGanttFrontEnd.oModTask.showEdit('+task_curr.intId+')" title="'
                             +this.oParent.lang["title - edit"]
                         +'">'
