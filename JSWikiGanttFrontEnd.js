@@ -1141,6 +1141,7 @@ window.onload = function () {
             oP.stack = null;
             return null;
         }
+        debugger;
         
         let lastChild = this.getLastChild(taskIndex, oNewTask.intId);
         console.log(lastChild);
@@ -1158,8 +1159,8 @@ window.onload = function () {
                 
                 /* If the task that is being moved has any children, then skip them */
                 if (oP.arrTasks[i].intParent === oNewTask.intId) {
-                    i++;
-                    continue;
+                        i++;
+                        continue;
                 }
                 
                 /* Keep removing from stack until either (the last element is the parent of current task or stack is empty) */
@@ -1199,6 +1200,13 @@ window.onload = function () {
 
             i++;
         }
+        
+        /* If it exited the loop without inserting the task
+        then the last task is it's child, so we keep it at the same spot */
+        console.log('Exit array without inserting, so keep it where it was')
+        oP.arrTasks.splice(taskIndex, 0, oNewTask);
+        return null;
+        
     }
 
     /* ------------------------------------------------------------------------ *\
