@@ -912,7 +912,7 @@ window.onload = function () {
         let i;
         for (i = 0; i < arrTasks.length; i++) {
             if (arrTasks[i].intParent === oTask.intId) {
-                arrTasks[i].intParent = null;
+                arrTasks[i].intParent = (oTask.intParent) ? oTask.intParent : null;
             }
         }
 
@@ -1034,13 +1034,11 @@ window.onload = function () {
 
         this.oMsg.close();
 
-
-
         this.oParent.oListAct.refresh();
     }
     
     /* ------------------------------------------------------------------------ *\
-        Checks date field format YYYY-MM-DD
+        Regular expression that checks date field format YYYY-MM-DD
     \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.oModTask.isDateFormatCorrect = function(date){
         let re = /^(19|20|21)\d{2}-(0[1-9]|1[0-2])-(0[1-9]|1\d|2\d|3[01])/;
@@ -1108,7 +1106,7 @@ window.onload = function () {
     }
 
     /* ------------------------------------------------------------------------ *\
-        Calculates end date given a start daye and duration	
+        Calculates end date given a start date and duration	
     \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.oModTask.addBusinessDays = function(startDate, days){
         let newDate = new Date(startDate);
@@ -1141,7 +1139,6 @@ window.onload = function () {
             oP.stack = null;
             return null;
         }
-        debugger;
         
         let lastChild = this.getLastChild(taskIndex, oNewTask.intId);
         console.log(lastChild);
@@ -1314,13 +1311,6 @@ window.onload = function () {
                 return ''
             }
     };
-    
-
-
-
-
-
-
 
     /* ------------------------------------------------------------------------ *\
           List Activities object that is used to show tasks
@@ -1356,7 +1346,6 @@ window.onload = function () {
             if (task_prev && task_prev.intId != task_curr.intParent) { 
                 /* Increase indent level and reassign prev parent to current one */
                 while (stack.last() != task_curr.intParent){
-                    //debugger;
                     let parentFromStack = stack.pop();
 
                     indentLevel--;
