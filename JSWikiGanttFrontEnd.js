@@ -500,9 +500,6 @@ window.onload = function () {
         this.buildLabels(intTaskId);
         let oP = this.oParent;
 
-        // Make sure next task has a unique id
-        oP.nextId++;
-
         let now = new Date();
         oP.oNewTask = {
             intId : intTaskId,
@@ -535,12 +532,15 @@ window.onload = function () {
     /* ------------------------------------------------------------------------ *\
         @return: boolean - success code
 
-        Append new task to the list, submit and refresh 	
+        Append new task to the list, submit and refresh 
     \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.oModTask.submitAdd = function ()
     {
-
         let oP = this.oParent;
+        
+        // Make sure next task has a unique id
+        oP.nextId++;
+        
         if (!(this.preSubmitTask(oP))){
             return false;
         }
@@ -554,7 +554,10 @@ window.onload = function () {
     }
 
     /* ------------------------------------------------------------------------ *\
-        Gets the object and displays a form to edit it 	
+        @param: taskId - id of the task to edit, embedded in HTML, passed in
+        upon click
+        
+        Gets the object using id and displays it's edit form 	
     \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.oModTask.showEdit = function(taskId){
 
@@ -619,14 +622,19 @@ window.onload = function () {
     }
 
     /* ------------------------------------------------------------------------ *\
-        Assigns the new task object in the array at the specified index		
+        @param: taskIndex - previous index of the task edited
+        @param: intParentOld - parent id of the task if it had one
+        @return: boolean - success code
+        
+        Assigns the new task object in the array at the same place or finds the 
+        new posuition, and moves the children along with it
     \* ------------------------------------------------------------------------ */
 
     oJSWikiGanttFrontEnd.oModTask.submitEdit = function(taskIndex, intParentOld){
 
         let oP = this.oParent;
         if (!(this.preSubmitTask(oP))){
-            return;
+            return false;
         }
 
         /* Removing the old task */
@@ -647,7 +655,11 @@ window.onload = function () {
     }
 
     /* ------------------------------------------------------------------------ *\
-        Pre configure before submiting a task  	
+        @param: oP - (oJSWikiGanttFrontEnd) passed in to avoid using globals
+        @return: boolean - success code
+        
+        Pre configure task object before submiting (add or edit). Checks and
+        assigns all the input to the task object
     \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.oModTask.preSubmitTask = function(oP){
         let task = oP.oNewTask;
@@ -724,7 +736,12 @@ window.onload = function () {
     }
     
     /* ------------------------------------------------------------------------ *\
-         The function for save and return to read mode  	
+         @param: taskIndex - index or null or position
+         @param: intParentOld - tasks previous parent or null
+         @param: isNewTask - boolean for calling either submit edit or add  
+         
+         save and exit button. Calls submitEdit or submitAdd, and submits
+         the edit form to return to read page.  	
     \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.oModTask.saveBtnFunction = function(taskIndex, intParentOld, isNewTask){
         
@@ -750,22 +767,24 @@ window.onload = function () {
         
         //Add semi-transparent overlay while page loads
         this.oParent.createOverlay();
-    
     }
     
     /* ------------------------------------------------------------------------ *\
-        When user clicks on delete task button  	
+        @param: taskId - id of task to be deleted. Embedded in HTML, passed
+        in upon delete button click
+        
+        When user clicks on delete task button. generates HTML for the del form
     \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.oModTask.showDel = function(taskId){
         let strHTML, i;
         let start = '', end = '';
         for (i=0; i<this.oParent.arrTasks.length; i++){
             let oA = this.oParent.arrTasks[i];
-
-            let start = (oA.strDateStart) ? ': ' + oA.strDateStart : '';
-            let end = (oA.strDateEnd) ? ' - ' + oA.strDateEnd : '';
             
             if (oA.intId === taskId){
+                let start = (oA.strDateStart) ? ': ' + oA.strDateStart : '';
+                let end = (oA.strDateEnd) ? ' - ' + oA.strDateEnd : '';
+                
                 strHTML = "<h2>"+this.oParent.lang['header - del']+"</h2>" +
                     oA.strName + start + end;	
                 break;
@@ -779,7 +798,10 @@ window.onload = function () {
 
 
     /* ------------------------------------------------------------------------ *\
-        Uses the index of a task object and removes it from the array  	
+        @param: taskIndex - index of task to be deleted. Passed in from showDel        
+        
+        Uses the index of a task object and removes it from the array, and makes 
+        it's grandparent adapt the possible orphaned children
     \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.oModTask.submitDel = function(taskIndex){
 
@@ -802,7 +824,10 @@ window.onload = function () {
     }
 
     /* ------------------------------------------------------------------------ *\
-        Builds 2 arrays {label,value} objects of all tasks and only groups
+        @param: taskId - id of the task so we can skip it 
+        
+        Called from show (add/edit). Builds 2 arrays {label,value} objects
+        of all tasks and only groups for the drowndown list (select group/parent)
     \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.oModTask.buildLabels = function (taskId)
     {
@@ -842,7 +867,11 @@ window.onload = function () {
     }
 
     /* ------------------------------------------------------------------------ *\
-        Making the task template form 	
+        @param: strNewTaskObject - input task object
+        @return: JSON 
+        
+        Making the input objects for the task form (edit/add) for task passed in.
+        Called by edit/add, output is used to crete
     \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.oModTask.getArrFields = function(strNewTaskObject)
     {
@@ -905,11 +934,11 @@ window.onload = function () {
     }
 
     /* ------------------------------------------------------------------------ *\
-        Builds XML code, sets it in the wiki and refreshes all tasks  	
+        Builds XML code, sets it in the wiki and refreshes all tasks, called
+        after any change to tasks
     \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.oModTask.submitCommon = function ()
     {
-
         var strWikicode = this.oParent.buildWikicode();
 
         this.oParent.setContents(strWikicode);
@@ -920,6 +949,8 @@ window.onload = function () {
     }
     
     /* ------------------------------------------------------------------------ *\
+        @param: date - imput date to check if correct format is entered
+        
         Regular expression that checks date field format YYYY-MM-DD
     \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.oModTask.isDateFormatCorrect = function(date){
@@ -931,11 +962,14 @@ window.onload = function () {
     }
 
     /* ------------------------------------------------------------------------ *\
-        Updates group/milestone of oNewTask and set visibility of fields
+        @param: id - group or milestone or default_color. Embedded in HTML
+        
+        Updates group/milestone of oNewTask and sets visibility of other fields
+        depending on group or milestone
     \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.oModTask.toggleChecked = function(id){
 
-        let checked = document.getElementById(id).checked;
+        let checked = document.getElementById(id).checked; //boolean
         if (id === "group"){
             this.oParent.oNewTask.boolGroup = checked;
             this.updateFieldsVisibility("toggle_visibility_group", checked);
@@ -957,6 +991,9 @@ window.onload = function () {
     }
     
     /* ------------------------------------------------------------------------ *\
+        @param: className - class for which to hide or show
+        @param: checked - boolean for checkbox, determines hide/show
+        
         Helper function deals with setting display of related fields
     \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.oModTask.updateFieldsVisibility = function(className, checked){
@@ -988,7 +1025,10 @@ window.onload = function () {
     }
 
     /* ------------------------------------------------------------------------ *\
-        Calculates end date given a start date and duration	
+        @param: startDate - string date in the yyyy-mm-dd format
+        @param: days - int number of business days to offset by
+        
+        Calculates end date given a start date and duration by using moment lib
     \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.oModTask.addBusinessDays = function(startDate, days){
         let newDate = new Date(startDate);
@@ -999,6 +1039,14 @@ window.onload = function () {
     }
 
     /* ------------------------------------------------------------------------------------- *\
+        @param: taskIndex - where task used to be or null for new task
+        @param: intParentOld - potential parent that the task had before or null
+        @return: object or null - { 
+                startIndex: starting index of potential children, given index of where task was
+                endIndex: index of last child, or null
+                parentNewIndex: index of where the task has been inserted, could be the same
+                }
+        
         Algorithm that finds the proper spot for task in already sorted array and inserts it
         It also accounts for when a  parent task changes then all of it's kids must follow
     \* ------------------------------------------------------------------------------------- */
@@ -1089,6 +1137,10 @@ window.onload = function () {
     }
 
     /* ------------------------------------------------------------------------ *\
+        @param: whereTaskWas - index of the task (used as starting index of children) 
+        @param: parentId - id of parent task
+        @return: index of last child of specified task or null
+        
         Returns the last child index for a task
     \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.oModTask.getLastChild = function(whereTaskWas, parentId) {
@@ -1146,7 +1198,11 @@ window.onload = function () {
     }
     
     /* ------------------------------------------------------------------------ *\
-        Moves the children to where the parent moved
+        @param: startingAt - starting index of subtasks
+        @param: endingAt - ending index of subtasks
+        @return: parentIndex - index of parent task, for children to be moved under
+        
+        Moves the children to where the parent moved. Called by dubmit edit
     \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.oModTask.moveChildren = function(startingAt, endingAt, parentIndex) {
         let oP = this.oParent;
@@ -1169,7 +1225,8 @@ window.onload = function () {
     }
     
     /* ------------------------------------------------------------------------ *\
-        Changes the value of color field to default on button press
+        Changes the value of color field to default on button press. Called 
+        when make defauilt button is clicked
     \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.oModTask.makeDefaultColor = function() {
         $("#input_color")[0].value = oJSWikiGanttFrontEnd.conf.defaultColor;
@@ -1179,6 +1236,9 @@ window.onload = function () {
     
     
     /* ------------------------------------------------------------------------ *\
+        @param: st - string to encode as HTML
+        @return: string - formatted with special chars escaped
+
         Escapes the strings with proper sequences
     \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.encodeHTML = function (st) {
@@ -1195,13 +1255,15 @@ window.onload = function () {
     };
 
     /* ------------------------------------------------------------------------ *\
-          List Activities object that is used to show tasks
+        List activities object that is used to show tasks
     \* ------------------------------------------------------------------------ */
-    oJSWikiGanttFrontEnd.oListAct = {}
+    oJSWikiGanttFrontEnd.oListAct = {};
 
 
     /* ------------------------------------------------------------------------ *\
-         Displays the list of tasks with options to edit or delete
+        Displays the list of tasks with options to edit or delete. Formatted 
+        so tasks with no parents show up with bullet points, and all children
+        have been indented according to inheritance
     \* ------------------------------------------------------------------------ */
 
     oJSWikiGanttFrontEnd.oListAct.show = function () {
@@ -1285,7 +1347,7 @@ window.onload = function () {
 
 
     /* ------------------------------------------------------------------------ *\
-        Refresh task list 	
+        Refreshes task list 	
     \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.oListAct.refresh = function ()
     {
@@ -1314,7 +1376,8 @@ window.onload = function () {
 
 
     /* ------------------------------------------------------------------------ *\
-        Displays Edit Gantt option if the <jsgantt> tags present (keyup event) 
+        Displays Edit Gantt option if the <jsgantt> tags present (keyup event)
+        called by init
     \* ------------------------------------------------------------------------ */
 
     oJSWikiGanttFrontEnd.checkForTags = function () {
@@ -1323,6 +1386,7 @@ window.onload = function () {
         if(match){
             let editBtn = oJSWikiGanttFrontEnd.editBtnRef;
             editBtn.style.display = 'block';
+            elEditArea.removeEventListener("keyup", this.checkForTags);
             return true;
         }
         return false;
