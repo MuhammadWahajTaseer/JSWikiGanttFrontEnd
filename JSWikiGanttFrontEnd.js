@@ -1,15 +1,11 @@
 window.onload = function () {
 
-    //var oJSWikiGanttFrontEnd; if(!oJSWikiGanttFrontEnd) oJSWikiGanttFrontEnd = {};
     window.oJSWikiGanttFrontEnd = {};
 
     Array.prototype.last = function () {
         return this[this.length - 1];
     };
-    Array.prototype.secondLast = function () {
-        return this[this.length - 2];
-    };
-    oJSWikiGanttFrontEnd.ver = oJSWikiGanttFrontEnd.version = '1.0.0';
+    oJSWikiGanttFrontEnd.ver = oJSWikiGanttFrontEnd.version = '2.0.0';
     oJSWikiGanttFrontEnd.conf = {"" : ""
         , strFallbackLang : 'en'
         , strLang         : mw.config.values.wgContentLanguage   // Language to be used (note this probably shouldn't be user selectable, should be site wide)
@@ -96,7 +92,9 @@ window.onload = function () {
         }
     }
 
-
+    /* ------------------------------------------------------------------------ *\
+            Adds the "Edit Gantt Chart" button on the edit page
+    \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.addEdButton = function (){
 
         var elTB = document.getElementById('editform');
@@ -114,7 +112,10 @@ window.onload = function () {
         nel.appendChild(document.createTextNode(this.lang["button label"]));
         elTB.insertBefore(nel, elTB.firstChild);
     }
-    // EOC@line#215
+
+    /* ------------------------------------------------------------------------ *\
+            Called by addEdButton, get's XML code calls parser and list tasks
+    \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.startEditor = function ()
     {
 
@@ -123,7 +124,6 @@ window.onload = function () {
         {
             jsAlert(this.lang["gantt not found"])
             this.oParent.oListAct.oMsg.close();
-
         }
 
         if (!this.parse(strWikicode))
@@ -134,155 +134,13 @@ window.onload = function () {
         // Main editor window: list of tasks
         this.oListAct.show();  
     }
-    // EOC@line#247
-    oJSWikiGanttFrontEnd.indexOfPerson = function(intPersonId)
-    {
-        for (var i=0; i<this.arrPersons.length; i++)
-        {
-            if (this.arrPersons[i] && this.arrPersons[i].intId==intPersonId)
-            {
-                return i;
-            }
-        }
-        return -1;
-    }
-    // EOC@line#265
-    oJSWikiGanttFrontEnd.firstIdOfPersonByName = function(strPersonName)
-    {
-        for (var i=0; i<this.arrPersons.length; i++)
-        {
-            if (this.arrPersons[i] && this.arrPersons[i].strName==strPersonName)
-            {
-                return this.arrPersons[i].intId;
-            }
-        }
-        return false;
-    }
-    // EOC@line#281
-    oJSWikiGanttFrontEnd.getActivityId = function(pRes, pColor)
-    {
-        //"activities"
-        for (var i=0; i<this.lang.activities.length; i++)
-        {
-
-            if (this.lang.activities[i].name == pRes
-                && (this.conf.isActivitiesIdentfiedByName || this.lang.activities[i].color == pColor)
-            )
-            {
-                return i;
-            }
-        }
-        return -1;
-    }
-
+    
 
     /* ------------------------------------------------------------------------ *\
-            Called by oModTask.submitAdd and adds task to array
-    \* ------------------------------------------------------------------------ */
-    oJSWikiGanttFrontEnd.addTask = function(oTask)
-    {
-        this.arrTasks.push(oTask);
-    }
-
-    // EOC@line#324
-    oJSWikiGanttFrontEnd.addPerson = function(strPersonName)
-    {
-        var intPer = this.arrPersons.length;
-        var intDefaultStep = 10;
-
-        var intPersonId = (intPer>0) ? this.arrPersons[intPer-1].intId + intDefaultStep : intDefaultStep;
-        while (this.indexOfPerson (intPersonId)!=-1)
-        {
-            intPersonId+=10;
-        }
-
-        this.arrPersons[intPer] = {
-            intId : intPersonId,
-            strName : strPersonName,
-            arrActivities : new Array()
-        }
-    }
-    // EOC@line#345
-    oJSWikiGanttFrontEnd.setTask = function(oTask, intPersonId, intActIndex)
-    {
-        var intPer = this.indexOfPerson (intPersonId);
-
-        if (intPer==-1)
-        {
-            return false;
-        }
-
-        this.arrPersons[intPer].arrActivities[intActIndex] = {
-            strDateStart : oTask.strDateStart,
-            strDateEnd : oTask.strDateEnd,
-            intId : oTask.intActivityId
-        }
-        return true;
-    }
-    // EOC@line#365
-    oJSWikiGanttFrontEnd.setPerson = function(strPersonName, intPersonId)
-    {
-        var intPer = this.indexOfPerson (intPersonId);
-
-        if (intPer==-1)
-        {
-            return false;
-        }
-
-        this.arrPersons[intPer].strName = strPersonName;
-        return true;
-    }
-
-    /* ------------------------------------------------------------------------ *\
-        Removes the task from the list based given it's index
-    \* ------------------------------------------------------------------------ */
-    //oJSWikiGanttFrontEnd.delTask = function(taskIndex){	
-
-    //	this.arrTasks.splice(taskIndex, 1);
-    //}
-    // EOC@line#397
-    oJSWikiGanttFrontEnd.delPerson = function(intPersonId)
-    {
-        var intPer = this.indexOfPerson (intPersonId);
-
-        if (intPer==-1)
-        {
-            return false;
-        }
-
-        this.arrPersons[intPer] = undefined;
-
-        this.arrPersons.myReIndexArray()
-        return true;
-    }
-    // EOC@line#415
-    Array.prototype.myReIndexArray = function ()
-    {
-        for (var i=0; i<this.length; i++)
-        {
-            if (this[i]==undefined)
-            {
-
-                for (var j=i; j<this.length; j++)
-                {
-                    if (this[j]==undefined)
-                    {
-                        continue;
-                    }
-                    this[i]=this[j];
-                    this[j]=undefined;
-                    break;
-                }
-            }
-        }
-
-        while (this.length > 0 && this[this.length-1] == undefined)
-        {
-            this.length--;
-        }
-    }
-
-    /* ------------------------------------------------------------------------ *\
+        @param: arrFields - Objects with attributes for each input field
+        @param: strHeader - Title for the form
+        @return: html string for the full form with appropriate input fields
+        
         Creates the form using array of objects defining fields and title	
     \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.createForm = function(arrFields, strHeader)
@@ -387,18 +245,20 @@ window.onload = function () {
                     +  '<button style="margin-left:52px;" type="button" onclick="oJSWikiGanttFrontEnd.oModTask.makeDefaultColor()">Make Default!</button>';
                     + '</p>'
                     
-                    
                 break;
             }
         }
         
-        strRet += ''
-            + '</div>'
-        ;
+        strRet += '</div>';
         return strRet;
     }
 
-
+    /* ------------------------------------------------------------------------ *\
+        @param: strWikicode - input string to be parsed to XML
+        @return: String - parsed XML  
+        
+        Takes in a string and parses and returns it to XML
+    \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.parseToXMLDoc = function(strWikicode)
     {
         strWikicode = "<root>"+strWikicode+"</root>";
@@ -417,6 +277,13 @@ window.onload = function () {
         return docXML;
     }
 
+    /* ------------------------------------------------------------------------ *\
+        @param: strWikiCode - input text from edit area
+        @return: boolean - success code for the function 
+        
+        Called by start editor takes in text from edit area, uses the XML to
+        generate the tasks array and set default color from XML
+    \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.parse = function(strWikicode)
     {
         let docXML = this.parseToXMLDoc(strWikicode);
@@ -434,6 +301,8 @@ window.onload = function () {
             }
             this.arrTasks.push(oTask);
         }
+        //DEBUG
+        console.log('nextId: ' + oJSWikiGanttFrontEnd.nextId);
         
         /* Parse the preferences if any: default color */
         try{
@@ -446,7 +315,10 @@ window.onload = function () {
     }
 
     /* ------------------------------------------------------------------------ *\
-        Read in the XML of individual task nodes and build array of Tasks
+        @param: nodeTask - XML for a task
+        @return: oNewTask - Task object with attributes from XML
+        
+        Parse helper function, creates an object from XML of a task
     \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.preParseTask = function(nodeTask)
     {
@@ -505,18 +377,14 @@ window.onload = function () {
         try{boolMile = parseInt(nodeTask.getElementsByTagName('pMile')[0].textContent);} catch(e){} 
         finally{oTask.boolMile = (boolMile) ? true : false;}
 
-        //console.log("start: "+ strDateStart + " end: "+strDateEnd + " color: " + strColor + " resources: " + strResources + " parent: " + intParent + " pMile: " + boolMile + "intDur: "+ intDur);	
-    //	catch (e){
-    //		jsAlert(this.lang["gantt parse error - at task"]
-    //			.replace(/%pID%/g, oTask.intId)
-    //			.replace(/%pName%/g, oTask.strName)
-    //		);
-    //		return false;
-    //	} 
-
         return oTask;
     }
-    
+
+    /* ------------------------------------------------------------------------ *\
+        @return: String - Contents in the edit area of the wiki page
+        
+        Gets the text from edit area. Returns false if it can't find it.
+    \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.getContents = function ()
     {        
         this.elEditArea = document.getElementById('wpTextbox1');
@@ -529,6 +397,11 @@ window.onload = function () {
         return false;
     }
 
+    /* ------------------------------------------------------------------------ *\
+        @param: strWikicode - The XML code generated from arrTasks
+        
+        Sets the contents in <jsgantt> to strWikicode
+    \* ------------------------------------------------------------------------ */    
     oJSWikiGanttFrontEnd.setContents = function(strWikicode)
     {
         var el = this.elEditArea;
@@ -536,6 +409,8 @@ window.onload = function () {
     }
 
     /* ------------------------------------------------------------------------ *\
+        @return: strWikicode - XML code of each task from the tasks array
+        
         Build the jsGantt XML code by looping through all tasks
     \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.buildWikicode = function ()
@@ -556,7 +431,10 @@ window.onload = function () {
     }
 
     /* ------------------------------------------------------------------------ *\
-        Build the jsGantt XML code a task
+        @param: oTask - Task object
+        @return: String - XML code for the task
+        
+        Build the jsGantt XML code of a task
     \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.buildTaskcode = function(oTask)
     {
@@ -607,19 +485,22 @@ window.onload = function () {
 
 
     /* ------------------------------------------------------------------------ *\
-        Modify task object used to modify any task  	
+        Creating the "modify task" object used to modify any task  	
     \* ------------------------------------------------------------------------ */
-    oJSWikiGanttFrontEnd.oModTask = new Object();
+    oJSWikiGanttFrontEnd.oModTask = {};
 
 
     /* ------------------------------------------------------------------------ *\
-        Display new task template	
+        @param: intTaskId - unique id passed in
+        
+        Display new task template
     \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.oModTask.showAdd = function(intTaskId)
     {
         this.buildLabels(intTaskId);
         let oP = this.oParent;
-        //Increment id
+
+        // Make sure next task has a unique id
         oP.nextId++;
 
         let now = new Date();
@@ -652,14 +533,16 @@ window.onload = function () {
     }
 
     /* ------------------------------------------------------------------------ *\
-        Append the task to the list, submit and refresh 	
+        @return: boolean - success code
+
+        Append new task to the list, submit and refresh 	
     \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.oModTask.submitAdd = function ()
     {
 
         let oP = this.oParent;
         if (!(this.preSubmitTask(oP))){
-            return;
+            return false;
         }
 
         /* Add in new task */
@@ -879,13 +762,12 @@ window.onload = function () {
         for (i=0; i<this.oParent.arrTasks.length; i++){
             let oA = this.oParent.arrTasks[i];
 
-            
+            let start = (oA.strDateStart) ? ': ' + oA.strDateStart : '';
+            let end = (oA.strDateEnd) ? ' - ' + oA.strDateEnd : '';
             
             if (oA.intId === taskId){
-
-                strHTML = "<h2>"+this.oParent.lang['header - del']+"</h2>"
-                    +oA.strName
-                    +": "+oA.strDateStart+" - "+oA.strDateEnd;	
+                strHTML = "<h2>"+this.oParent.lang['header - del']+"</h2>" +
+                    oA.strName + start + end;	
                 break;
             }
         }
