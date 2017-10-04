@@ -495,8 +495,7 @@ window.onload = function () {
         
         Display new task template
     \* ------------------------------------------------------------------------ */
-    oJSWikiGanttFrontEnd.oModTask.showAdd = function(intTaskId)
-    {
+    oJSWikiGanttFrontEnd.oModTask.showAdd = function(intTaskId) {
         this.buildLabels(intTaskId);
         let oP = this.oParent;
 
@@ -534,8 +533,7 @@ window.onload = function () {
 
         Append new task to the list, submit and refresh 
     \* ------------------------------------------------------------------------ */
-    oJSWikiGanttFrontEnd.oModTask.submitAdd = function ()
-    {
+    oJSWikiGanttFrontEnd.oModTask.submitAdd = function () {
         let oP = this.oParent;
         
         // Make sure next task has a unique id
@@ -695,21 +693,9 @@ window.onload = function () {
         }
 
         /* Check for hidden fields and set values accordingly */
-        if (task.boolGroup){
-            task.strDateStart    = null;
-            task.strDateEnd      = null;
-            task.intDur          = null;
-            task.intComp         = null;
-            task.intColor        = null;
-        }
-
-        /* Check for hidden fields and set values accordingly */
         if (task.boolMile){
             task.strDateEnd      = task.strDateStart;
             task.intDur          = 1;
-            task.strResources    = null;
-            task.boolGroup       = null;
-            task.intColor        = null;
         }
         
         /* Deal with parents */
@@ -1425,7 +1411,7 @@ window.onload = function () {
         msg.styleZbase += 30;
         msg.showCancel = true;
         msg.showSave = true;
-        msg.autoOKClose = true;
+        msg.autoOKClose = false;
         msg.createRegularForm = false;
         this.oModTask.oMsg = msg;
         this.oModTask.oParent = this;
