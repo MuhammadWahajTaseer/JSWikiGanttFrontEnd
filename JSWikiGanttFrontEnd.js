@@ -519,8 +519,14 @@ window.onload = function () {
         var strHTML = this.oParent.createForm(arrFields, this.oParent.lang['header - add']);
 
         var msg = this.oMsg;
-        msg.saveBtnFunction = 'oJSWikiGanttFrontEnd.oModTask.saveBtnFunction('+ null +', '+ this.oParent.oNewTask.intParent+','+ 1 +')';
+        //msg.saveBtnFunction = 'oJSWikiGanttFrontEnd.oModTask.saveBtnFunction('+ null +', '+ this.oParent.oNewTask.intParent+','+ true +')';
         msg.show(strHTML, 'oJSWikiGanttFrontEnd.oModTask.submitAdd()');
+        
+        // Create an onclick function for save/exit button
+        $('#saveExitBtn').click(function() {
+            oJSWikiGanttFrontEnd.oModTask.saveBtnFunction(oJSWikiGanttFrontEnd.oNewTask.intId, oJSWikiGanttFrontEnd.oNewTask.intParent , false); 
+        });
+        
         msg.repositionMsgCenter();
         $(document).ready(function() {
             jscolor.installByClassName("jscolor");
@@ -593,8 +599,14 @@ window.onload = function () {
         this.oParent.oNewTask.intParent = (this.oParent.oNewTask.intParent) ? this.oParent.oNewTask.intParent : null;
 
         let msg = this.oMsg;
-        msg.saveBtnFunction = 'oJSWikiGanttFrontEnd.oModTask.saveBtnFunction('+i+', '+ this.oParent.oNewTask.intParent+','+ 0 +')';
         msg.show(strHTML, 'oJSWikiGanttFrontEnd.oModTask.submitEdit('+i+', '+ this.oParent.oNewTask.intParent+')');
+        
+        // Update onclick function for save/exit button
+        $('#saveExitBtn').click(function() {
+            oJSWikiGanttFrontEnd.oModTask.saveBtnFunction(oJSWikiGanttFrontEnd.oNewTask.intId, oJSWikiGanttFrontEnd.oNewTask.intParent , false); 
+        });
+        
+        //msg.updateSaveBtnFunction();
         msg.repositionMsgCenter();
 
         /* If group is checked then hide the related fields */
@@ -636,6 +648,7 @@ window.onload = function () {
         }
 
         /* Removing the old task */
+        console.log("1. Removing: " + oP.arrTasks[taskIndex].strName);
         oP.arrTasks.splice(taskIndex, 1);
 
         /* Add in edited task */
@@ -729,12 +742,13 @@ window.onload = function () {
          save and exit button. Calls submitEdit or submitAdd, and submits
          the edit form to return to read page.  	
     \* ------------------------------------------------------------------------ */
-    oJSWikiGanttFrontEnd.oModTask.saveBtnFunction = function(taskIndex, intParentOld, isNewTask){
+    oJSWikiGanttFrontEnd.oModTask.saveBtnFunction = function(taskId, intParentOld, isNewTask){
         
         let submit;
         
         // Submit the task
         if (!isNewTask){
+            let taskIndex = this.getTaskIndexbyId(taskId);
             submit = this.submitEdit(taskIndex, intParentOld);
         }
         else{
@@ -796,6 +810,7 @@ window.onload = function () {
         let arrTasks = this.oParent.arrTasks;
         
         //Remove it from the array
+        console.log("2. Removing: " + oJSWikiGanttFrontEnd.arrTasks[taskIndex].strName);
         this.oParent.arrTasks.splice(taskIndex, 1);
         
         // If this task had any children, making their parent null
@@ -1197,7 +1212,7 @@ window.onload = function () {
         let i = 0;
         
         let children = arr.splice(startingAt, diff + 1);
-        console.log(children)
+        console.log('children: ' + JSON.stringify(children));
         console.log(startingAt, endingAt, parentIndex);
         
         if (parentIndex > startingAt) {
@@ -1219,6 +1234,22 @@ window.onload = function () {
         $("#input_color")[0].jscolor.fromString($("#input_color")[0].value)         // update the color immediately
         oJSWikiGanttFrontEnd.oNewTask.strColor = $("#input_color")[0].value; 
     }
+    
+    
+    
+    
+    oJSWikiGanttFrontEnd.oModTask.getTaskIndexbyId = function(taskId) {
+        let i, arrTasks = this.oParent.arrTasks;
+        for (i = 0; i < arrTasks.length; i++) {
+            if (arrTasks[i].intId === taskId) {
+                return i;
+            }
+        }
+        return false;
+    }
+    
+    
+    
     
     
     /* ------------------------------------------------------------------------ *\
