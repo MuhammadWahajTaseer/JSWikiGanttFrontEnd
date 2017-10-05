@@ -524,7 +524,7 @@ window.onload = function () {
         
         // Create an onclick function for save/exit button
         $('#saveExitBtn').click(function() {
-            oJSWikiGanttFrontEnd.oModTask.saveBtnFunction(oJSWikiGanttFrontEnd.oNewTask.intId, oJSWikiGanttFrontEnd.oNewTask.intParent , false); 
+            oJSWikiGanttFrontEnd.oModTask.saveBtnFunction(oJSWikiGanttFrontEnd.oNewTask.intId, oJSWikiGanttFrontEnd.oNewTask.intParent , true); 
         });
         
         msg.repositionMsgCenter();
