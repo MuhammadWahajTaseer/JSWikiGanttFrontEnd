@@ -100,7 +100,7 @@ window.onload = function () {
         var elTB = document.getElementById('editform');
         if (!elTB)
         {
-            return;
+            jsAlert("Can't place the edit chart button")
         }
 
         var nel = document.createElement('a');
@@ -119,7 +119,7 @@ window.onload = function () {
     oJSWikiGanttFrontEnd.startEditor = function ()
     {
 
-        let strWikicode = this.getContents();
+        let strWikicode = this.getContents().replace(/'/g, '&apos;').replace(/"/g, '&apos;').replace(/&/g, '&amp;');;
         if (strWikicode===false)
         {
             jsAlert(this.lang["gantt not found"])
