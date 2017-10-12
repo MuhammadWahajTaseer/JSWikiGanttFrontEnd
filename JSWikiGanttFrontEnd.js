@@ -1,4 +1,7 @@
 window.onload = function () {
+    
+    //If there is a previously created overlay, then get rid of it. Useful for naviagting in history
+    $('#gantt_overlay').hide();
 
     window.oJSWikiGanttFrontEnd = {};
 
@@ -27,7 +30,7 @@ window.onload = function () {
     oJSWikiGanttFrontEnd.lang = {"":""
         ,'en' : {"":""
             ,"button label" : "Edit Gantt Chart"
-            ,"gantt not found"                          : "There seems to be no calendar here. Add a &lt;jsgantt autolink='0'&gt;&lt;/jsgantt&gt; tag, if you want to start."
+            ,"gantt not found"                          : "There seems to be no gantt chart here. Add a &lt;jsgantt&gt;&lt;/jsgantt&gt; tag, if you want to start."
             ,"gantt parse error - general"              : "Error parsing the gantt diagram code. This diagram is probably not a calendar."
             ,"gantt parse error - no id and name at nr" : "Error parsing code at task number %i%. This calendar is either weird or broken."
             ,"gantt parse error - at task"              : "Error parsing code at task with id %pID% (name: %pName%). This diagram is probably not a calendar or is broken."
@@ -100,7 +103,7 @@ window.onload = function () {
         var elTB = document.getElementById('editform');
         if (!elTB)
         {
-            jsAlert("Can't place the edit chart button")
+            jsAlert("Can't place the edit chart button, you probably don't have permissions to edit the page")
         }
 
         var nel = document.createElement('a');
@@ -341,7 +344,7 @@ window.onload = function () {
         }
         catch (e)
         {
-            jsAlert(this.lang["gantt parse error - no id and name at nr"].replace(/%i%/g, i));
+            jsAlert('Can\'t parse tasks.. check tags');
             return false;
         }
 
@@ -1387,6 +1390,7 @@ window.onload = function () {
         overlay.style.width = '100%';
         overlay.style.height = '100%';
         overlay.style.opacity = '.7';
+        overlay.id = 'gantt_overlay';
         document.body.appendChild(overlay);
     }
 
@@ -1513,7 +1517,10 @@ window.onload = function () {
         window.history.replaceState({}, "", window.location.href.split('#openTask=')[0]);
         
         openTask = taskName.replace(/\+|\'/g, ' ');
-        //console.log('Open this task: ' + openTask);
+
+        // Get rid of overlay from previous page..
+        
+        
         addOnloadHook(function () {oJSWikiGanttFrontEnd.init()});
         oJSWikiGanttFrontEnd.init(openTask);
     }
