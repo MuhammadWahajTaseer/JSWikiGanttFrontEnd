@@ -105,7 +105,8 @@ window.onload = function () {
         var elTB = document.getElementById('editform');
         if (!elTB)
         {
-            jsAlert("Can't place the edit chart button, you probably don't have permissions to edit the page")
+            jsAlert("Can't place the edit chart button, you probably don't have permissions to edit the page");
+            return;
         }
 
         var nel = document.createElement('a');
@@ -123,12 +124,13 @@ window.onload = function () {
     \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.startEditor = function ()
     {
+        debugger;
         let strWikicode = oJSWikiGanttFrontEnd.getContents();
         if (!strWikicode) {
             jsAlert('Error parsing XML');
         }
         
-        strWikicode.replace(/'/g, '&apos;').replace(/"/g, '&apos;').replace(/&/g, '&amp;');
+        strWikicode = strWikicode.replace(/'/g, '&apos;').replace(/"/g, '&apos;').replace(/&/g, '&amp;');
         if (strWikicode===false)
         {
             jsAlert(this.lang["gantt not found"])
@@ -295,6 +297,7 @@ window.onload = function () {
     \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.parse = function(strWikicode)
     {
+        debugger;
         let docXML = this.parseToXMLDoc(strWikicode);
         let elsTasks = docXML.getElementsByTagName('task');
         this.arrPersons = new Array();
@@ -637,7 +640,6 @@ window.onload = function () {
         $(document).ready(function() {
             jscolor.installByClassName("jscolor");
         });
-        
     }
 
     /* ------------------------------------------------------------------------ *\
@@ -1300,7 +1302,7 @@ window.onload = function () {
         
         let oP = this.oParent;
         let strList = '<h2>'+ 'Tasks' +'</h2>';
-        strList += '<ul style="text-align:left">';
+        strList += '<ul style="text-align:left; font-size: 14px;">';
 
         while (i<oP.arrTasks.length) {
             
@@ -1472,7 +1474,6 @@ window.onload = function () {
             //Configuring what needs to be observed
             let config = {attributes: true};
             observer.observe(elEditArea, config);
-            
         }
         
         // Task form
@@ -1552,10 +1553,7 @@ window.onload = function () {
         let taskName = window.location.href.split('openTask=')[1];
         window.history.replaceState({}, "", window.location.href.split('#openTask=')[0]);
         
-        openTask = taskName.replace(/\+|\'/g, ' ');
-
-        // Get rid of overlay from previous page..
-        
+        openTask = taskName.replace(/\+|\'/g, ' ');        
         
         oJSWikiGanttFrontEnd.init(openTask);
     }
