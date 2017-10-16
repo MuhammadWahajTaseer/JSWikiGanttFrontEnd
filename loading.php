@@ -3,14 +3,13 @@ class LoadJS {
     
     function setup($wgOut)
     {
-        global $wgJobSchEdDir, $wgJobSchEdScriptDir, $wgJobSchEdtScriptVersion;
-        $wgJobSchEdDir= rtrim(dirname(__FILE__), "/\ ");
-        $wgJobSchEdScriptDir = "/mediawiki/extensions/JSWikiGanttFrontEnd";
-        $wgJobSchEdtScriptVersion = 1;
+        global $wgJSWGFEDir, $wgJSWGFEScriptDir, $wgJSWGFEtScriptVersion;
+        $wgJSWGFEDir= rtrim(dirname(__FILE__), "/\ ");
+        $wgJSWGFEScriptDir = "/mediawiki/extensions/JSWikiGanttFrontEnd";
+        $wgJSWGFEtScriptVersion = 1;
         
-        global $wgJobSchEdDir;
+        global $wgJSWGFEDir;
         
-        #$outputPage->addModules( 'ext.JobSchEd.foo' );
         $wgOut->addScriptFile(LoadJS::getCSSJSLink("lib/sftJSmsg.js"));
         $wgOut->addScriptFile(LoadJS::getCSSJSLink("lib/node_modules/moment/moment.js"));
         $wgOut->addScriptFile(LoadJS::getCSSJSLink("lib/node_modules/moment-business-days/index.js"));
@@ -18,12 +17,15 @@ class LoadJS {
         // Note! This name should be the same as in JSWikiGantt extension
         $wgOut->addScriptFile(LoadJS::getCSSJSLink("date-functions.js"));
         $wgOut->addScriptFile(LoadJS::getCSSJSLink("JSWikiGanttFrontEnd.js"));
+        $wgOut->addScriptFile(LoadJS::getCSSJSLink("lib/attrchange-2.0.1/js/attrchange.js"));
+        $wgOut->addScriptFile(LoadJS::getCSSJSLink("lib/attrchange-2.0.1/js/attrchange_ext.js"));
+
         return true;
     }
 
     function getCSSJSLink($strFileName)
     {
-        global $wgJobSchEdtScriptVersion, $wgJobSchEdScriptDir;
-        return "{$wgJobSchEdScriptDir}/{$strFileName}?{$wgJobSchEdtScriptVersion}";
+        global $wgJSWGFEtScriptVersion, $wgJSWGFEScriptDir;
+        return "{$wgJSWGFEScriptDir}/{$strFileName}?{$wgJSWGFEtScriptVersion}";
     }
 }

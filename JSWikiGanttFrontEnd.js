@@ -3,19 +3,22 @@ window.onload = function () {
     //If there is a previously created overlay, then get rid of it. Useful for naviagting in history
     $('#gantt_overlay').hide();
 
+    // Load required modules
+    mw.loader.load( 'ext.JSWGFE' );
+    
     window.oJSWikiGanttFrontEnd = {};
 
     Array.prototype.last = function () {
         return this[this.length - 1];
     };
-    oJSWikiGanttFrontEnd.ver = oJSWikiGanttFrontEnd.version = '2.0.0';
+    oJSWikiGanttFrontEnd.ver = oJSWikiGanttFrontEnd.version = '1.0.0';
     oJSWikiGanttFrontEnd.conf = {"" : ""
         , strFallbackLang : 'en'
         , strLang         : mw.config.values.wgContentLanguage   // Language to be used (note this probably shouldn't be user selectable, should be site wide)
         , isAutoAddLogged : true
                                        // Note that this doesn't mean that any task is added and so diagram will be changed only if the users adds a task.
         ,strFormat : 'Y-m-d'
-        ,reGantMatch : /(<jsgantt[^>]*>)([\s\S]*)(<\/jsgantt>)/
+        ,reGantMatch : /(<jsgantt[^<]*>)([\s\S]*)(<\/jsgantt>)/
         ,isActivitiesIdentfiedByName : true
         
         ,currentColor : '8CB6CE'    //dynamically assigned
@@ -99,7 +102,6 @@ window.onload = function () {
             Adds the "Edit Gantt Chart" button on the edit page
     \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.addEdButton = function (){
-
         var elTB = document.getElementById('editform');
         if (!elTB)
         {
@@ -121,8 +123,12 @@ window.onload = function () {
     \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.startEditor = function ()
     {
-
-        let strWikicode = this.getContents().replace(/'/g, '&apos;').replace(/"/g, '&apos;').replace(/&/g, '&amp;');;
+        let strWikicode = oJSWikiGanttFrontEnd.getContents();
+        if (!strWikicode) {
+            jsAlert('Error parsing XML');
+        }
+        
+        strWikicode.replace(/'/g, '&apos;').replace(/"/g, '&apos;').replace(/&/g, '&amp;');
         if (strWikicode===false)
         {
             jsAlert(this.lang["gantt not found"])
@@ -1407,7 +1413,7 @@ window.onload = function () {
         if(match){
             let editBtn = oJSWikiGanttFrontEnd.editBtnRef;
             editBtn.style.display = 'block';
-            elEditArea.removeEventListener("keyup", this.checkForTags);
+            //elEditArea.removeEventListener("keyup", this.checkForTags); Now tag goes away for different editors, so need this
             return true;
         }
         return false;
@@ -1433,10 +1439,40 @@ window.onload = function () {
         
         // Check if gantt chart tags are present
         let tagsPresent = this.checkForTags();
-        if (!tagsPresent){
+        if (!tagsPresent) {
             // Add event listener for the jsgantt tag
             let elEditArea = document.getElementById('wpTextbox1');
             elEditArea.addEventListener("keyup", this.checkForTags);
+            
+            /** If tags are present but wpTextbox 1 is not because of different editor then
+                check again for tags once it becomes visible */
+            let observer = new MutationObserver( function(mutations) {
+                    mutations.forEach(function(mutation){
+                        
+                        // Checking if Wiki Editor is active
+                        let WikiEditorPresent = false;
+                        let editBtn = oJSWikiGanttFrontEnd.editBtnRef;
+                        $('#wpTextbox1').attr('style').split(';').forEach(function(element){
+                            if ((/display.*inline/).test(element)) {
+                                // If wiki text editor && tage present then show edit button
+                                if (oJSWikiGanttFrontEnd.checkForTags()){
+                                    WikiEditorPresent = true;
+                                    editBtn.style.display = 'block';
+                                }
+                            }
+                        });
+                        if (!WikiEditorPresent) {
+                            // Else remove the button
+                            editBtn.style.display = 'none';
+                        }
+
+                    });
+            });
+            
+            //Configuring what needs to be observed
+            let config = {attributes: true};
+            observer.observe(elEditArea, config);
+            
         }
         
         // Task form
@@ -1521,12 +1557,10 @@ window.onload = function () {
         // Get rid of overlay from previous page..
         
         
-        addOnloadHook(function () {oJSWikiGanttFrontEnd.init()});
         oJSWikiGanttFrontEnd.init(openTask);
     }
     
     else if (mw.config.values.wgAction=="edit" || mw.config.values.wgAction=="submit") {
-    	addOnloadHook(function () {oJSWikiGanttFrontEnd.init()});
         oJSWikiGanttFrontEnd.init();
     }
 
