@@ -3,9 +3,6 @@ window.onload = function () {
     //If there is a previously created overlay, then get rid of it. Useful for naviagting in history
     $('#gantt_overlay').hide();
 
-    // Load required modules
-    mw.loader.load( 'ext.JSWGFE' );
-    
     window.oJSWikiGanttFrontEnd = {};
 
     Array.prototype.last = function () {
@@ -39,29 +36,20 @@ window.onload = function () {
             ,"gantt parse error - at task"              : "Error parsing code at task with id %pID% (name: %pName%). This diagram is probably not a calendar or is broken."
             ,"gantt parse error - unknow activity"      : "Error! Unknow activity (name: %pRes%, color: %pColor%). This diagram is probably not a calendar or is broken."
             ,"gantt build error - at task"              : "Error building wikicode at task with id %pID% (name: %pName%).\nError: %errDesc%."
-            ,"gantt add error - unknown person"         : "Error! This person was not found. Are you sure you already added this?"
             ,"header - add"                             : "Add an entry"
             ,"header - edit"                            : "Edit an entry"
-            ,"header - persons"                         : "Choose a person"
             ,"header - del"                             : "Are sure you want to delete this?"
-            ,"label - person"                           : "Person"
             ,"label - activity"                         : "Type"
             ,"label - date start"                       : "Start"
             ,"label - date end"                         : "End"
             ,"label - new activity"                     : "add an entry"
-            ,"label - new person"                       : "add a person"
             ,"alt - mod"                                : "Change"
             ,"alt - del"                                : "Delete"
             ,"close button label"                       : "Close"
-            ,"title - list act"                         : "Show this person's entries"
             ,"title - edit"                             : "Edit"
             ,"title - add"                              : "Add"
             ,"title - del"                              : "Delete"
-            ,"activities" : [
-                {name: "Time off", color:"00cc00"},
-                {name: "Delegation", color:"0000cc"},
-                {name: "Sickness", color:"990000"}
-            ]
+
 
         }
         ,'pl' : {"":""
@@ -72,29 +60,20 @@ window.onload = function () {
             ,"gantt parse error - at task"              : "Błąd parsowania kodu przy zadaniu o id %pID% (nazwa: %pName%). Ten diagram nie jest kalendarzem, albo są w nim błędy."
             ,"gantt parse error - unknow activity"      : "Błąd! Nieznana aktywność (nazwa: %pRes%, kolor: %pColor%). Ten diagram nie jest kalendarzem, albo są w nim błędy."
             ,"gantt build error - at task"              : "Błąd budowania wiki-kodu przy zadaniu o id %pID% (nazwa: %pName%).\nBłąd: %errDesc%."
-            ,"gantt add error - unknown person"         : "Błąd! Wybrana osoba nie została znaleziona. Czy na pewno dodałeś(-aś) ją wcześniej?"
             ,"header - add"                             : "Dodaj wpis"
             ,"header - edit"                            : "Edytuj wpis"
-            ,"header - persons"                         : "Wybierz osobę"
             ,"header - del"                             : "Czy na pewno chcesz usunąć?"
-            ,"label - person"                           : "Osoba"
             ,"label - activity"                         : "Typ"
             ,"label - date start"                       : "Początek"
             ,"label - date end"                         : "Koniec"
             ,"label - new activity"                     : "dodaj wpis"
-            ,"label - new person"                       : "dodaj osobę"
             ,"alt - mod"                                : "Zmień"
             ,"alt - del"                                : "Usuń"
             ,"close button label"                       : "Zamknij"
-            ,"title - list act"                         : "Pokaż wpisy osoby"
             ,"title - edit"                             : "Edytuj"
             ,"title - add"                              : "Dodaj"
             ,"title - del"                              : "Usuń"
-            ,"activities" : [
-                {name: "Urlop", color:"00cc00"},
-                {name: "Delegacja", color:"0000cc"},
-                {name: "Choroba", color:"990000"}
-            ]
+
         }
     }
 
@@ -300,7 +279,6 @@ window.onload = function () {
         debugger;
         let docXML = this.parseToXMLDoc(strWikicode);
         let elsTasks = docXML.getElementsByTagName('task');
-        this.arrPersons = new Array();
 
         this.arrTasks = [];
         this.nextId = 1; 
@@ -1271,7 +1249,7 @@ window.onload = function () {
     \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.encodeHTML = function (st) {
             if (st) {
-                return st.replace(/&/g, '&amp;')
+                return st.replace(/&[^amp]/g, '&amp;')
                .replace(/</g, '&lt;')
                .replace(/>/g, '&gt;')
                .replace(/"/g, '&apos;')
@@ -1511,7 +1489,7 @@ window.onload = function () {
 
         // Autoedit
         
-        if (location.href.search(/[&?]jsganttautoedit=1/)>=0){
+        if (location.href.search(/[&?]jsganttautoedit=1/)>=0 && !openTask){
             this.startEditor();
         }
 
@@ -1526,10 +1504,12 @@ window.onload = function () {
                 console.log(iTaskName);
                 
                 iTaskName = iTaskName.replace(/&quot;|\'|\+|\"/g, '');
-                iTaskName = iTaskName.replace(/\s+/g, " ")
-                openTask = openTask.replace(/%27/g, "'")
-                openTask = openTask.replace(/%3C/g, "<")
-                openTask = openTask.replace(/%3E/g, ">")
+                iTaskName = iTaskName.replace(/\s+/g, " ");
+                iTaskName = iTaskName.replace(/&amp;/g, "&");
+                
+                openTask = openTask.replace(/%27/g, "'");
+                openTask = openTask.replace(/%3C/g, "<");
+                openTask = openTask.replace(/%3E/g, ">");
                 if (iTaskName === openTask){
                     taskRequested = this.arrTasks[i];
                     break;
@@ -1550,6 +1530,7 @@ window.onload = function () {
         Start	
     \* ------------------------------------------------------------------------ */
     if (window.location.href.indexOf('openTask') > -1) {
+        debugger;
         let taskName = window.location.href.split('openTask=')[1];
         window.history.replaceState({}, "", window.location.href.split('#openTask=')[0]);
         
