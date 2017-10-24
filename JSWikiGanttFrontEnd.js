@@ -103,7 +103,6 @@ window.onload = function () {
     \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.startEditor = function ()
     {
-        debugger;
         let strWikicode = oJSWikiGanttFrontEnd.getContents();
         if (!strWikicode) {
             jsAlert('Error parsing XML');
@@ -276,7 +275,6 @@ window.onload = function () {
     \* ------------------------------------------------------------------------ */
     oJSWikiGanttFrontEnd.parse = function(strWikicode)
     {
-        debugger;
         let docXML = this.parseToXMLDoc(strWikicode);
         let elsTasks = docXML.getElementsByTagName('task');
 
@@ -1529,8 +1527,10 @@ window.onload = function () {
     /* ------------------------------------------------------------------------ *\
         Start	
     \* ------------------------------------------------------------------------ */
+
+    
+    
     if (window.location.href.indexOf('openTask') > -1) {
-        debugger;
         let taskName = window.location.href.split('openTask=')[1];
         window.history.replaceState({}, "", window.location.href.split('#openTask=')[0]);
         
