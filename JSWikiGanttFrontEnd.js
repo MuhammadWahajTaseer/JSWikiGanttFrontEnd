@@ -1021,8 +1021,17 @@ window.onload = function () {
     oJSWikiGanttFrontEnd.oModTask.addBusinessDays = function(startDate, days){
         let newDate = new Date(startDate);
         let moment_instance = new moment(startDate, "YYYY-MM-DD");
-        let endDate = moment_instance.businessAdd(days)._d;	
-        let endDateString = ((endDate.getYear()+1900) + "-" + (endDate.getMonth()+1) + "-" + endDate.getDate());
+        
+        /* Add business days if moment-business-days-lib is loaded otherwise add normal days */
+        let endDate, endDateString;
+        if (typeof(moment_instance.businessAddy) === 'function'){
+            endDate = moment_instance.businessAdd(days)._d;	
+            endDateString = ((endDate.getYear()+1900) + "-" + (endDate.getMonth()+1) + "-" + endDate.getDate());
+        }
+        else {
+            endDate = moment().add(days, 'days'); 
+            endDateString = ((endDate._d.getYear()+1900) + "-" + (endDate._d.getMonth()+1) + "-" + endDate._d.getDate());
+        }
         return endDateString;	
     }
 

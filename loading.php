@@ -17,12 +17,7 @@ class LoadJS {
         // Note! This name should be the same as in JSWikiGantt extension
         $wgOut->addScriptFile(LoadJS::getCSSJSLink("date-functions.js"));
         $wgOut->addScriptFile(LoadJS::getCSSJSLink("JSWikiGanttFrontEnd.js"));
-        //$wgOut->addScriptFile(LoadJS::getCSSJSLink("lib/attrchange-2.0.1/js/attrchange.js"));
-        //$wgOut->addScriptFile(LoadJS::getCSSJSLink("lib/attrchange-2.0.1/js/attrchange_ext.js"));
-        //$wgOut->addScriptFile(LoadJS::getCSSJSLink("libDraggableGroupWidget.js/"));
-        //$wgOut->addScriptFile(LoadJS::getCSSJSLink("lib/DraggableItemWidget.js"));
 
-        //$wgOut->addModules('oojs-ui');
         return true;
     }
 
