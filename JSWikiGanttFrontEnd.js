@@ -1024,7 +1024,7 @@ window.onload = function () {
         
         /* Add business days if moment-business-days-lib is loaded otherwise add normal days */
         let endDate, endDateString;
-        if (typeof(moment_instance.businessAddy) === 'function'){
+        if (typeof(moment_instance.businessAdd) === 'function'){
             endDate = moment_instance.businessAdd(days)._d;	
             endDateString = ((endDate.getYear()+1900) + "-" + (endDate.getMonth()+1) + "-" + endDate.getDate());
         }
